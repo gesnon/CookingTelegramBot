@@ -21,16 +21,16 @@ namespace CookingTelegramBot.Application.Services
 
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             var config = Configuration.Default.WithDefaultLoader();
-            int recipeId = 3;
+            int recipeId = 515;
             using var context = BrowsingContext.New(config);
 
             List<Recipe> result = new List<Recipe>();
-            while (recipeId > 0)
+            while (recipeId < 1000)
             {
                 List<Ingredient> IngredientsfromBase = _context.Ingredients.ToList();
 
                 Console.WriteLine(recipeId);
-                recipeId--;
+                recipeId++;
                 string urlAddress = $"https://food.ru/recipes/{recipeId}";
                 using var doc = await context.OpenAsync(urlAddress);
                 var titleElement = doc.QuerySelector(".title_title__DUuGT.slugPage_title__jB45m");
@@ -46,6 +46,16 @@ namespace CookingTelegramBot.Application.Services
                 }
                 var products = doc.QuerySelectorAll(".ingredientsTable_table__QFLKe.ingredientsCalculator_ingredientsTable__GIHSQ tr td").Select(p => p.Text()).ToArray();
 
+                List<string> ingredientName = new List<string>();
+                for(int p = 0; p < products.Length - 2; p += 2)
+                {
+                    ingredientName.Add(products[p]);
+                }
+
+                if (ingredientName.Distinct().Count() != ingredientName.Count)
+                {
+                    continue;
+                }
                 
                 List<RecipeIngredient> recipeIngredients = new List<RecipeIngredient>();
                 for(int i = 0; i < products.Length-1; i += 2)
